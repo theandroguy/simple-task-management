@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Management Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" integrity="sha512-wnea99uKIC3TJF7v4eKk4Y+lMz2Mklv18+r4na2Gn1abDRPPOeef95xTzdwGD9e6zXJBteMIhZ1+68QC5byJZw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    .draggable { cursor: move; }
+    .over { border: 2px dashed #3b82f6; }
+    .timer { display: inline-block; border: 1px solid #ccc; border-radius: 5px; padding: 5px 10px; background-color: #f9f9f9; margin-right: 5px; }
+    .insight { border: 1px solid #d1d5db; padding: 10px; border-radius: 8px; background-color: #f9fafb; margin-bottom: 15px; }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="min-h-screen bg-gray-100">
+    <nav class="bg-white shadow-lg">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+          <div class="flex">
+            <div class="flex-shrink-0 flex items-center">
+              <i class="fas fa-tasks text-blue-500 text-2xl mr-2"></i>
+              <span class="font-bold text-xl text-gray-800">Task Dashboard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+          <!-- Task Input Form -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add New Task</h3>
+              <form id="taskForm">
+                <div class="space-y-4">
+                  <input type="text" id="taskTitle" class="w-full p-2 border border-gray-300 rounded" placeholder="Task Title" required>
+                  <div class="grid grid-cols-2 gap-4">
+                    <input type="date" id="taskDeadline" class="w-full p-2 border border-gray-300 rounded" required>
+                    <select id="taskPriority" class="w-full p-2 border border-gray-300 rounded" required>
+                      <option value="" disabled selected>Priority</option>
+                      <option value="Critical">Critical</option>
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                    </select>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <input type="time" id="taskStartTime" class="w-full p-2 border border-gray-300 rounded" required>
+                    <input type="time" id="taskEndTime" class="w-full p-2 border border-gray-300 rounded" required>
+                  </div>
+                  <select id="taskCategory" class="w-full p-2 border border-gray-300 rounded" required>
+                    <option value="" disabled selected>Category</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Home">Home</option>
+                    <option value="Fitness">Fitness</option>
+                    <option value="Study">Study</option>
+                  </select>
+                  <input type="text" id="taskLabels" class="w-full p-2 border border-gray-300 rounded" placeholder="Labels (comma-separated)">
+                  <div class="flex items-center gap-4">
+                    <input type="checkbox" id="recurringTask" class="h-4 w-4 text-blue-600">
+                    <label for="recurringTask" class="text-gray-700">Is this task recurring?</label>
+                  </div>
+                  <div id="recurringOptions" class="hidden">
+                    <select id="recurrenceInterval" class="w-full p-2 border border-gray-300 rounded">
+                      <option value="" disabled selected>Select interval</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+                  <button type="submit" id="submitTask" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                    Add Task
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Task List -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Task List</h3>
+              <div class="mb-4 flex gap-4">
+                <select id="filterCategory" class="w-1/2 p-2 border border-gray-300 rounded">
+                  <option value="">All Categories</option>
+                  <option value="Work">Work</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Home">Home</option>
+                  <option value="Fitness">Fitness</option>
+                  <option value="Study">Study</option>
+                </select>
+                <select id="sortTasks" class="w-1/2 p-2 border border-gray-300 rounded">
+                  <option value="">No Sorting</option>
+                  <option value="deadline">Deadline</option>
+                  <option value="priority">Priority</option>
+                  <option value="creation">Creation Date</option>
+                </select>
+              </div>
+              <ul id="taskList" class="space-y-4 max-h-96 overflow-y-auto">
+                <!-- Tasks will be appended here dynamically -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Analytics and Insights -->
+          <!-- <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Analytics and Insights</h3>
+              <div id="analyticsContainer">
+                <div class="insight">
+                  <h4 class="font-semibold">Task Completion Stats</h4>
+                  <p id="completedTasksCount" class="text-2xl font-bold text-blue-600"></p>
+                  <p id="averageCompletionTime" class="text-sm text-gray-600"></p>
+                </div>
+                <div class="insight">
+                  <h4 class="font-semibold">Time Management</h4>
+                  <p id="workTimeSpent" class="text-lg font-semibold text-indigo-600"></p>
+                  <p id="personalTimeSpent" class="text-lg font-semibold text-green-600"></p>
+                </div>
+              </div>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
